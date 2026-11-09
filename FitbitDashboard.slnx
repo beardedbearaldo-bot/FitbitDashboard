@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="FitbitDashboard/FitbitDashboard.csproj" />
+  <Project Path="FitbitDashbaord.Shared/FitbitDashbaord.Shared.csproj" Id="6567ff72-182c-4c10-b7c7-d6cc0bb97f5d" />
+  <Project Path="FitbitDashboard.API/FitbitDashboard.API.csproj" Id="2ab42552-15e9-404b-b983-5cd65c3c4fa3" />
+  <Project Path="FitbitDashboard/FitbitDashboard.WASM.csproj" />
 </Solution>
