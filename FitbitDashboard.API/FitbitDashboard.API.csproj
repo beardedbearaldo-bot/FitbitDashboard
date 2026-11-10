@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FitbitDashbaord.Shared\FitbitDashbaord.Shared.csproj" />
+    <ProjectReference Include="..\FitbitDashbaord.Shared\FitbitDashboard.Shared.csproj" />
   </ItemGroup>
 
 </Project>

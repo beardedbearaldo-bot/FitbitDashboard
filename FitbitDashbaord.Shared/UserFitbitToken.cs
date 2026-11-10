@@ -1,4 +1,4 @@
-﻿namespace MySportsTechApp.Shared;
+﻿namespace FitbitDashboard.Shared;
 
 public class UserFitbitToken
 {

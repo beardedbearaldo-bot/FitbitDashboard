@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MySportsTechApp.Shared;
+using FitbitDashboard.Shared;
 
 namespace FitbitDesktop.API;
 
