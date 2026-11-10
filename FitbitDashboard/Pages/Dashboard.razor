@@ -1,5 +1,131 @@
-﻿<h3>Dashboard</h3>
+﻿@page "/dashboard"
+@using FitbitDashboard.Shared
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>Athlete Performance & Recovery</h1>
+        <p class="text-muted">Live biometric telemetry parsed through sport science protocols</p>
+    </header>
+
+    @if (loading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Ingesting wearable data packets...</p>
+        </div>
+    }
+    else if (errorMessage != null)
+    {
+        <div class="alert alert-danger">
+            ⚠️ @errorMessage
+        </div>
+    }
+    else
+    {
+        <!-- SECTION 1: SYSTEMIC RECOVERY INDEX -->
+        <div class="metrics-grid">
+            @if (recoveryData != null)
+            {
+                <div class="metric-card recovery-card @recoveryData.VisualIndicatorColor.ToLower()">
+                    <div class="card-header">
+                        <h3>Systemic Recovery Index</h3>
+                        <span class="badge">Fitbit v1.2 Log</span>
+                    </div>
+                    <div class="score-display">
+                        <span class="score-num">@recoveryData.SleepEfficiencyScore%</span>
+                        <span class="score-label">Sleep Efficiency</span>
+                    </div>
+                    <div class="sleep-breakdown">
+                        <p><strong>Total Sleep:</strong> @(recoveryData.TotalMinutesAsleep / 60)h @(recoveryData.TotalMinutesAsleep % 60)m</p>
+                        <p><strong>Deep Phase:</strong> @recoveryData.DeepSleepMinutes mins</p>
+                        <p><strong>REM Phase:</strong> @recoveryData.RemSleepMinutes mins</p>
+                    </div>
+                    <div class="coaching-recommendation">
+                        <strong>Coach Programming Directive:</strong>
+                        <p>@recoveryData.RecoveryRecommendation</p>
+                    </div>
+                </div>
+            }
+
+            <!-- SECTION 2: CARDIOVASCULAR INTENSITY METRICS -->
+            @if (heartRateData != null)
+            {
+                <div class="metric-card telemetry-card">
+                    <div class="card-header">
+                        <h3>Cardiovascular Stress Profile</h3>
+                        <span class="badge">Intraday Stream</span>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-box">
+                            <span class="stat-val">@heartRateData.AverageHeartRate</span>
+                            <span class="stat-lbl">Avg HR (BPM)</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-val">@heartRateData.MaxHeartRate</span>
+                            <span class="stat-lbl">Max HR (BPM)</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-val">@heartRateData.TotalMinutesTracked</span>
+                            <span class="stat-lbl">Mins Logged</span>
+                        </div>
+                    </div>
+
+                    <div class="zone-distribution">
+                        <h4>Training Zone Distribution</h4>
+                        @foreach (var zone in heartRateData.ZoneDistributionMinutes)
+                        {
+                            // Calculate percentage width for visual progress bars
+                            var percent = heartRateData.TotalMinutesTracked > 0
+                                ? (zone.Value * 100 / heartRateData.TotalMinutesTracked)
+                                : 0;
+
+                            <div class="zone-bar-container">
+                                <div class="zone-labels">
+                                    <span>@zone.Key</span>
+                                    <span>@zone.Value mins (@percent%)</span>
+                                </div>
+                                <div class="progress-track">
+                                    <div class="progress-fill" style="width: @percent%"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
 
 @code {
+    private bool loading = true;
+    private string? errorMessage;
+    private HeartRateAnalyticsResult? heartRateData;
+    private AthleteRecoveryScore? recoveryData;
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Execute both API telemetry requests in parallel to optimize client performance
+            var heartRateTask = Http.GetFromJsonAsync<HeartRateAnalyticsResult>("api/biometrics/heartrate-summary");
+            var sleepTask = Http.GetFromJsonAsync<AthleteRecoveryScore>("api/biometrics/sleep-recovery");
+
+            await Task.WhenAll(heartRateTask, sleepTask);
+
+            heartRateData = await heartRateTask;
+            recoveryData = await sleepTask;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Failed to sync endpoints. Ensure your device is authenticated via the /connect gateway.";
+            Console.WriteLine($"Dashboard Error: {ex.Message}");
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
 }
+
