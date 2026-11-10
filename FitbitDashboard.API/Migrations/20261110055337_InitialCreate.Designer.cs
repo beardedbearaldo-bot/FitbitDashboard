@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FitbitDashboard.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261110054434_InitialCreate")]
+    [Migration("20261110055337_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace FitbitDashboard.API.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
-            modelBuilder.Entity("MySportsTechApp.Shared.UserFitbitToken", b =>
+            modelBuilder.Entity("FitbitDashboard.Shared.UserFitbitToken", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");

@@ -17,7 +17,7 @@ namespace FitbitDashboard.API.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
-            modelBuilder.Entity("MySportsTechApp.Shared.UserFitbitToken", b =>
+            modelBuilder.Entity("FitbitDashboard.Shared.UserFitbitToken", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");

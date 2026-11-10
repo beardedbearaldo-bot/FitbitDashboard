@@ -1,6 +1,6 @@
-using FitbitDesktop.API;
+using FitbitDashboard.API;
+using FitbitDashboard.API.Services;
 using Microsoft.EntityFrameworkCore;
-using MySportsTechApp.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +31,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=fitbitdashboard.db"));
 
 builder.Services.AddHostedService<FitbitTokenRefreshWorker>();
+
+builder.Services.AddScoped<FitbitTelemetryService>();
 
 var app = builder.Build();
 

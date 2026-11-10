@@ -1,11 +1,10 @@
-﻿using FitbitDesktop.API;
-using Microsoft.AspNetCore.Mvc;
-using MySportsTechApp.Shared;
+﻿using Microsoft.AspNetCore.Mvc;
+using FitbitDashboard.Shared;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-namespace MySportsTechApp.Api.Controllers;
+namespace FitbitDashboard.API.Controllers;
 
 [ApiController]
 [Route("[controller]")] // Resolves to api/auth due to your custom convention

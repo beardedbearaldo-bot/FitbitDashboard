@@ -1,10 +1,9 @@
-﻿using FitbitDesktop.API;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-namespace FitbitDashboard.Api;
+namespace FitbitDashboard.API;
 
 public class FitbitTokenRefreshWorker : BackgroundService
 {

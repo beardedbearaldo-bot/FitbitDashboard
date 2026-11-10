@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using FitbitDashboard.Shared;
 
-namespace FitbitDesktop.API;
+namespace FitbitDashboard.API;
 
 public class AppDbContext : DbContext
 {
