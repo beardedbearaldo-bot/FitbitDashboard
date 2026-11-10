@@ -27,7 +27,7 @@ public class AuthController : ControllerBase
         // Requesting access to activity, heart rate, and sleep data
         var scope = "activity%20heartrate%20sleep";
 
-        var url = $"https://fitbit.com{clientId}&redirect_uri={redirectUri}&scope={scope}&expires_in=604800";
+        var url = $"https://fitbit.com/oath2/authorize?&client_id={clientId}&redirect_uri={redirectUri}&scope={scope}&expires_in=604800";
 
         return Ok(new { Url = url });
     }
@@ -70,8 +70,10 @@ public class AuthController : ControllerBase
         // TODO: In production, store access_token & refresh_token securely in a Database!
         // For local development testing, we will just return them or redirect back to Blazor.
 
+#if DEBUG
         // Redirect back to your Blazor WASM frontend home page
         return Redirect("https://localhost:7170/dashboard");
+#endif
     }
 }
 
