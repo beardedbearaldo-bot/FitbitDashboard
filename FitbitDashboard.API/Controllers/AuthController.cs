@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FitbitDesktop.API;
+using Microsoft.AspNetCore.Mvc;
+using MySportsTechApp.Shared;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
 
 namespace MySportsTechApp.Api.Controllers;
 
@@ -10,11 +13,13 @@ public class AuthController : ControllerBase
 {
     private readonly IConfiguration _config;
     private readonly IHttpClientFactory _clientFactory;
+    private readonly AppDbContext _db;
 
-    public AuthController(IConfiguration config, IHttpClientFactory clientFactory)
+    public AuthController(IConfiguration config, IHttpClientFactory clientFactory, AppDbContext db)
     {
         _config = config;
         _clientFactory = clientFactory;
+        _db = db;
     }
 
     // 1. Blazor will call this to get the login URL
@@ -67,8 +72,36 @@ public class AuthController : ControllerBase
 
         var jsonString = await response.Content.ReadAsStringAsync();
 
-        // TODO: In production, store access_token & refresh_token securely in a Database!
-        // For local development testing, we will just return them or redirect back to Blazor.
+        // Parse the token properties out of Fitbit's payload
+        using var jsonDoc = JsonDocument.Parse(jsonString);
+        var root = jsonDoc.RootElement;
+
+        var accessToken = root.GetProperty("access_token").GetString()!;
+        var refreshToken = root.GetProperty("refresh_token").GetString()!;
+        var expiresInSeconds = root.GetProperty("expires_in").GetInt32();
+
+        // Look for our existing local-user profile row
+        var existingToken = await _db.FitbitTokens.FindAsync("local-user");
+
+        if (existingToken == null)
+        {
+            var newToken = new UserFitbitToken
+            {
+                Id = "local-user",
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                ExpiresAt = DateTime.UtcNow.AddSeconds(expiresInSeconds)
+            };
+            _db.FitbitTokens.Add(newToken);
+        }
+        else
+        {
+            existingToken.AccessToken = accessToken;
+            existingToken.RefreshToken = refreshToken;
+            existingToken.ExpiresAt = DateTime.UtcNow.AddSeconds(expiresInSeconds);
+        }
+
+        await _db.SaveChangesAsync();
 
 #if DEBUG
         // Redirect back to your Blazor WASM frontend home page

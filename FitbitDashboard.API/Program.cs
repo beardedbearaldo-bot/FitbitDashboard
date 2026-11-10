@@ -1,3 +1,6 @@
+using FitbitDesktop.API;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -22,6 +25,9 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHttpClient();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=fitbitdashboard.db"));
 
 var app = builder.Build();
 
