@@ -26,5 +26,16 @@ public class BiometricsController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpGet("sleep-recovery")]
+    public async Task<ActionResult<AthleteRecoveryScore>> GetSleepRecovery([FromQuery] string? date)
+    {
+        var targetDate = date ?? DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+        var result = await _telemetryService.GetSleepRecoveryScoreAsync(targetDate);
+        if (result == null) return NotFound("Unable to compile an athlete recovery profile for the specified structural payload.");
+
+        return Ok(result);
+    }
 }
 

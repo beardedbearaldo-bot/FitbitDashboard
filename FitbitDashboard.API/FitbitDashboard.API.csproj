@@ -21,4 +21,8 @@
     <ProjectReference Include="..\FitbitDashbaord.Shared\FitbitDashboard.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

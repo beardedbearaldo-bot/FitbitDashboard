@@ -65,5 +65,55 @@ public class FitbitTelemetryService
 
         return new HeartRateAnalyticsResult(points.Count, avgHr, maxHr, zones);
     }
+
+    public async Task<AthleteRecoveryScore?> GetSleepRecoveryScoreAsync(string date)
+    {
+        // 1. Fetch credentials from SQLite database layer
+        var token = await _db.FitbitTokens.FirstOrDefaultAsync(t => t.Id == "local-user");
+        if (token == null) return null;
+
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
+
+        // 2. Fetch v1.2 Sleep data from Fitbit
+        var url = $"https://fitbit.com{date}.json";
+        var response = await _httpClient.GetAsync(url);
+
+        if (!response.IsSuccessStatusCode) return null;
+
+        var payload = await response.Content.ReadFromJsonAsync<FitbitSleepResponse>();
+        var mainSleepLog = payload?.Sleep?.FirstOrDefault(s => s.Efficiency > 0); // Isolate the primary sleep cycle
+
+        if (mainSleepLog == null) return null;
+
+        // 3. Extract core tracking metrics
+        int efficiency = mainSleepLog.Efficiency;
+        int totalAsleep = mainSleepLog.MinutesAsleep;
+        int deepMinutes = mainSleepLog.Levels?.Summary?.Deep?.Minutes ?? 0;
+        int remMinutes = mainSleepLog.Levels?.Summary?.Rem?.Minutes ?? 0;
+
+        // 4. Calculate Athlete Recovery Programming Metric
+        string recommendation;
+        string color;
+
+        // Sports Science Heuristic: Evaluate nervous system and tissue structural regeneration status
+        if (efficiency >= 90 && deepMinutes >= 60)
+        {
+            recommendation = "Optimal neurological and systemic recovery. High-intensity CNS training/Max overloading permitted today.";
+            color = "Green";
+        }
+        else if (efficiency >= 80 || (deepMinutes + remMinutes) > 90)
+        {
+            recommendation = "Moderate baseline recovery. Proceed with standard scheduled program volume; closely monitor progressive fatigue.";
+            color = "Amber";
+        }
+        else
+        {
+            recommendation = "Impaired regenerative index. Limit heavy mechanical loading; prioritize dynamic mobility or active recovery session.";
+            color = "Red";
+        }
+
+        return new AthleteRecoveryScore(efficiency, totalAsleep, deepMinutes, remMinutes, recommendation, color);
+    }
 }
 
